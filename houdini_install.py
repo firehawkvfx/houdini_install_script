@@ -189,7 +189,7 @@ if os.name == 'posix':
     print 'Install File', install_file
     # ./houdini.install --auto-install --accept-EULA --make-dir /opt/houdini/16.0.705
     out_dir = create_output_dir(install_dir, build)
-    flags = '--auto-install --accept-EULA --make-dir'
+    flags = '--auto-install --accept-EULA --install-houdini --no-local-licensing --install-hfs-symlink --make-dir'
     if lic_server:
         pass
     cmd = 'sudo ./houdini.install {flags} {dir}'.format(
