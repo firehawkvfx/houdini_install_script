@@ -106,8 +106,11 @@ login_data = dict(username=username, password=password, csrfmiddlewaretoken=csrf
 r = client.post(URL, data=login_data, headers=dict(Referer=URL))
 
 # goto daily builds page
-print 'Get last build version...'
-page = client.get('http://www.sidefx.com/download/daily-builds/')
+# print 'Get last build version...'
+# page = client.get('http://www.sidefx.com/download/daily-builds/')
+
+print 'Get last production build version...'
+page = client.get('https://www.sidefx.com/download/daily-builds/#category-gold')
 
 # parse page
 s = BeautifulSoup(page.content, 'html.parser')
