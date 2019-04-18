@@ -18,11 +18,13 @@ parser.add_argument("-i", "--install_dir", type=str, help="Installation dir")
 parser.add_argument("-u", "--username", type=str, help="SideFx account username")
 parser.add_argument("-p", "--password", type=str, help="SideFx account password")
 parser.add_argument("-s", "--server", type=str, help="Install License server (y/yes, n/no, a/auto, default auto)")
+parser.add_argument("-b", "--buildversion", type=str, help="Use latest daily build (d/daily, p/production)")
 # parser.add_argument("-hq", "--hqserver", type=str, help="Install HQ server (y/yes, n/no, a/auto, default auto)")
 
 _args, other_args = parser.parse_known_args()
 username = _args.username
 password = _args.password
+
 if not username or not password:
     print 'Please set username and password'
     print 'Example: -u username -p password'
@@ -49,6 +51,15 @@ if _args.server:
         lic_server = True
     elif _args.server in ['n', 'no']:
         lic_server = False
+
+buildversion = "production"
+if _args.buildversion:
+    if _args.buildversion in ['d', 'daily']:
+        print "will get daily build"
+        buildversion = "daily"
+    elif _args.buildversion in ['p', 'production']:
+        print "will get production build"
+        buildversion = "production"
 
 # hq server
 # hq_server = False
@@ -105,12 +116,16 @@ login_data = dict(username=username, password=password, csrfmiddlewaretoken=csrf
 # login
 r = client.post(URL, data=login_data, headers=dict(Referer=URL))
 
+if ('daily' in buildversion):
+    print 'Get last daily build version...'
+    page = client.get('http://www.sidefx.com/download/daily-builds/')
+else:
+    print 'Get last production build version...'
+    page = client.get('https://www.sidefx.com/download/daily-builds/#category-gold')
+
 # goto daily builds page
 # print 'Get last build version...'
 # page = client.get('http://www.sidefx.com/download/daily-builds/')
-
-print 'Get last production build version...'
-page = client.get('https://www.sidefx.com/download/daily-builds/#category-gold')
 
 # parse page
 s = BeautifulSoup(page.content, 'html.parser')
