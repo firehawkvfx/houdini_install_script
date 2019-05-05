@@ -120,35 +120,19 @@ if ('daily' in buildversion):
     print 'Get last daily build version...'
     pageurl = "https://www.sidefx.com/download/daily-builds/#category-devel"
     page = client.get(pageurl)
+
+    s = BeautifulSoup(page.content, 'html.parser')
+    # get last daily build
+    a = s.find('div', {'class': lambda x: x and 'category-'+category in x.split() and 'category-devel' in x.split()}).find('a')
 else:
     print 'Get last production build version...'
     pageurl = "https://www.sidefx.com/download/daily-builds/#category-gold"
     page = client.get(pageurl)
 
-# goto daily builds page
-# print 'Get last build version...'
-# page = client.get('http://www.sidefx.com/download/daily-builds/')
+    s = BeautifulSoup(page.content, 'html.parser')
 
-
-print "pageurl:", pageurl
-# parse page
-s = BeautifulSoup(page.content, 'html.parser')
-#print "pagecontent:", s
-
-# get all versions
-# lin = s.findAll('div', {'class': lambda x: x and 'category-' + categorys['linux'] in x.split()})
-test = s.find('div', {'class': lambda x: x and 'category-'+'devel' in x.split()}).find('a')
-
-print "test", test
-
-# get last version
-a = s.find('div', {'class': lambda x: x and 'category-'+category in x.split()}).find('a')
-
-print 'a', a
-
-print "blob", str(a.text)
-
-print "re match", re.match(r".*?(\d+\.\d+\.\d+).*", str(a.text))
+    # get last version
+    a = s.find('div', {'class': lambda x: x and 'category-'+category in x.split()}).find('a')
 
 # get build
 build = re.match(r".*?(\d+\.\d+\.\d+).*", str(a.text)).group(1)
