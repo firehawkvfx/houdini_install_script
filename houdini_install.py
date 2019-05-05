@@ -1,3 +1,6 @@
+# execute example 
+# python houdini_install.py -u 'mysesiusername' -p 'mysesipass' -i '/opt/houdini' -b 'daily'
+
 import sys, re, os, shutil, argparse
 import getpass
 try:
@@ -19,6 +22,7 @@ parser.add_argument("-u", "--username", type=str, help="SideFx account username"
 parser.add_argument("-p", "--password", type=str, help="SideFx account password")
 parser.add_argument("-s", "--server", type=str, help="Install License server (y/yes, n/no, a/auto, default auto)")
 parser.add_argument("-b", "--buildversion", type=str, help="Use latest daily build (d/daily, p/production)")
+parser.add_argument("-d", "--downloadonly", type=str, help="Download latest installer only without install (true)")
 # parser.add_argument("-hq", "--hqserver", type=str, help="Install HQ server (y/yes, n/no, a/auto, default auto)")
 
 _args, other_args = parser.parse_known_args()
@@ -60,6 +64,12 @@ if _args.buildversion:
     elif _args.buildversion in ['p', 'production']:
         print "will get production build"
         buildversion = "production"
+
+downloadonly = False
+if _args.downloadonly:
+    if _args.downloadonly in ['true']:
+        print "will download latest without install"
+        downloadonly = True
 
 # hq server
 # hq_server = False
@@ -193,57 +203,61 @@ if need_to_download:
     print
     print 'Download complete'
 
-# start silent installation
-print 'Start install Houdini'
-if os.name == 'posix':
-    # unzip
-    print 'Unpack "%s" to "%s"' % (local_filename, tmp_folder)
-    cmd = 'sudo tar xf {} -C {}'.format(local_filename, tmp_folder)
-    os.system(cmd)
-    # os.remove(local_filename)
-    install_file = os.path.join(tmp_folder, os.path.splitext(os.path.splitext(os.path.basename(local_filename))[0])[0], 'houdini.install')
-    print 'Install File', install_file
-    # ./houdini.install --auto-install --accept-EULA --make-dir /opt/houdini/16.0.705
-    out_dir = create_output_dir(install_dir, build)
-    flags = '--auto-install --accept-EULA --install-houdini --no-local-licensing --install-hfs-symlink --make-dir'
-    if lic_server:
-        pass
-    cmd = 'sudo ./houdini.install {flags} {dir}'.format(
-        flags=flags,
-        dir=out_dir
-    )
-    print 'Create output folder', out_dir
-    if not os.path.exists(out_dir):
-        print 'Create folder:', out_dir
-        os.makedirs(out_dir)
-    print 'Start install...'
-    # print 'CMD:\n'+cmd
-    print 'GoTo', os.path.dirname(install_file)
-    os.chdir(os.path.dirname(install_file))
-    os.system(cmd)
-    # sudo chown -R paul: /opt/houdini/16.0.705
-    # sudo chmod 777 -R
-    # whoami
-    # setup permission
-    os.system('chown -R %s: %s' % (getpass.getuser(), out_dir))
-    os.system('chmod 777 -R ' + out_dir)
-    # delete downloaded file
-    # shutil.rmtree(tmp_folder)
+if downloadonly == True:
+    print "Skipping installation.  Download Only:", local_filename
 else:
-    out_dir = create_output_dir(install_dir, build)
-    print 'Create output folder', out_dir
-    if not os.path.exists(out_dir):
-        os.makedirs(out_dir)
-    cmd = '"{houdini_install}" /S /AcceptEula=yes /LicenseServer={lic_server} /DesktopIcon=No ' \
-          '/FileAssociations=Yes /HoudiniServer=No /EngineUnity=No ' \
-          '/EngineMaya=No /EngineUnreal=No /HQueueServer=No ' \
-          '/HQueueClient=No /IndustryFileAssociations=Yes /InstallDir="{install_dir}" ' \
-          '/ForceLicenseServer={lic_server} /MainApp=Yes /Registry=Yes'.format(
-            lic_server='Yes' if lic_server else 'No',
-            houdini_install=local_filename,
-            install_dir=out_dir
-            )
-    print 'CMD:\n' + cmd
-    print 'Start install...'
-    os.system(cmd)
-    print 'If installation not happen, repeat process.'
+    # start silent installation
+    print 'Start install Houdini'
+    if os.name == 'posix':
+        # unzip
+        print 'Unpack "%s" to "%s"' % (local_filename, tmp_folder)
+        cmd = 'sudo tar xf {} -C {}'.format(local_filename, tmp_folder)
+        os.system(cmd)
+        # os.remove(local_filename)
+        install_file = os.path.join(tmp_folder, os.path.splitext(os.path.splitext(os.path.basename(local_filename))[0])[0], 'houdini.install')
+        print 'Install File', install_file
+        # ./houdini.install --auto-install --accept-EULA --make-dir /opt/houdini/16.0.705
+        out_dir = create_output_dir(install_dir, build)
+        flags = '--auto-install --accept-EULA --install-houdini --no-license --install-hfs-symlink --make-dir'
+        if lic_server:
+            pass
+        cmd = 'sudo ./houdini.install {flags} {dir}'.format(
+            flags=flags,
+            dir=out_dir
+        )
+        print 'Create output folder', out_dir
+        if not os.path.exists(out_dir):
+            print 'Create folder:', out_dir
+            os.makedirs(out_dir)
+        print 'Start install...', install_file
+        # print 'CMD:\n'+cmd
+        print 'GoTo', os.path.dirname(install_file)
+        os.chdir(os.path.dirname(install_file))
+        print "use install file", install_file
+        os.system(cmd)
+        # sudo chown -R paul: /opt/houdini/16.0.705
+        # sudo chmod 777 -R
+        # whoami
+        # setup permission
+        os.system('chown -R %s: %s' % (getpass.getuser(), out_dir))
+        os.system('chmod 777 -R ' + out_dir)
+        # delete downloaded file
+        # shutil.rmtree(tmp_folder)
+    else:
+        out_dir = create_output_dir(install_dir, build)
+        print 'Create output folder', out_dir
+        if not os.path.exists(out_dir):
+            os.makedirs(out_dir)
+        cmd = '"{houdini_install}" /S /AcceptEula=yes /LicenseServer={lic_server} /DesktopIcon=No ' \
+            '/FileAssociations=Yes /HoudiniServer=No /EngineUnity=No ' \
+            '/EngineMaya=No /EngineUnreal=No /HQueueServer=No ' \
+            '/HQueueClient=No /IndustryFileAssociations=Yes /InstallDir="{install_dir}" ' \
+            '/ForceLicenseServer={lic_server} /MainApp=Yes /Registry=Yes'.format(
+                lic_server='Yes' if lic_server else 'No',
+                houdini_install=local_filename,
+                install_dir=out_dir
+                )
+        print 'CMD:\n' + cmd
+        print 'Start install...'
+        os.system(cmd)
+        print 'If installation not happen, repeat process.'
