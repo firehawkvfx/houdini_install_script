@@ -168,6 +168,7 @@ if not os.path.exists(install_dir):
 if queryonly:
     print "File:", a.text
 else:
+    # note, this isn't thourough enough.  the check should probably be handled in ansible.
     if build in os.listdir(install_dir):
         print 'Build {} already installed'.format(build)
         sys.exit()
