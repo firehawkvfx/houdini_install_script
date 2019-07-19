@@ -203,7 +203,7 @@ else:
     if need_to_download:
         # download file
         print 'Total size %sMb' % int(total_length/1024.0/1024.0)
-        block_size = 1024*4*16
+        block_size = 1024*4*16*16
         dl = 0
         with open(local_filename, 'wb') as f:
             for chunk in resp.iter_content(chunk_size=block_size):
