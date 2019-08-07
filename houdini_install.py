@@ -23,6 +23,7 @@ parser.add_argument("-u", "--username", type=str, help="SideFx account username"
 parser.add_argument("-p", "--password", type=str, help="SideFx account password")
 parser.add_argument("-s", "--server", type=str, help="Install License server (y/yes, n/no, a/auto, default auto)")
 parser.add_argument("-b", "--buildversion", type=str, help="Use latest daily build (d/daily, p/production)")
+parser.add_argument("-f", "--filename", type=str, help="Use a specific file to install houdini (houdini-17.5.326-linux_x86_64_gcc6.3.tar.gz)")
 parser.add_argument("-d", "--downloadonly", type=str, help="Download latest installer only without install (true)")
 parser.add_argument("-q", "--queryonly", type=str, help="query the filename only for the latest daily or produciton build (true)")
 # parser.add_argument("-hq", "--hqserver", type=str, help="Install HQ server (y/yes, n/no, a/auto, default auto)")
@@ -84,6 +85,11 @@ if _args.queryonly:
     if _args.queryonly in ['true']:
         print "will query latest filename without download or install"
         queryonly = True
+
+existing_filename = None
+if _args.filename and _args.filename != 'auto':
+    existing_filename = os.path.join(tmp_folder, _args.filename).replace('\\', '/')
+    print "existing_filename", existing_filename
 
 # hq server
 # hq_server = False
@@ -159,6 +165,10 @@ else:
 
 # get build
 build = re.match(r".*?(\d+\.\d+\.\d+).*", str(a.text)).group(1)
+
+if existing_filename is not None:
+    build = re.match(r".*?(\d+\.\d+\.\d+).*", str(_args.filename)).group(1)
+
 print 'Last build is ', build
 
 # check your last version here
@@ -186,11 +196,17 @@ else:
     local_filename = os.path.join(tmp_folder, a.text).replace('\\', '/')
 
     print '  Local File:', local_filename
+    need_to_download = True
+    if existing_filename is not None:
+        need_to_download = False
+        local_filename = existing_filename
+        print '  Existing File Specified, Changed to:', existing_filename
+        
 
     # get content
     resp = client.get(url, stream=True)
     total_length = int(resp.headers.get('content-length'))
-    need_to_download = True
+    
     if os.path.exists(local_filename):
         # compare file size
         if not os.path.getsize(local_filename) == total_length:
@@ -253,6 +269,7 @@ else:
             print 'GoTo', os.path.dirname(install_file)
             os.chdir(os.path.dirname(install_file))
             print "use install file", install_file
+            print 'CMD:\n' + cmd
             os.system(cmd)
             # sudo chown -R paul: /opt/houdini/16.0.705
             # sudo chmod 777 -R
