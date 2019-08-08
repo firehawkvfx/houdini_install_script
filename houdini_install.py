@@ -182,18 +182,10 @@ else:
     if build in os.listdir(install_dir):
         print 'Build {} already installed'.format(build)
         sys.exit()
-
-    # if your version is lower go to download
-    print 'Start download...'
-    # download url
-    url = 'http://www.sidefx.com' + a.get('href').split('=')[-1] + 'get/'
-    print '  DOWNLOAD URL:', url
-
+    
     # create local file path
     if not os.path.exists(tmp_folder):
         os.makedirs(tmp_folder)
-    
-    local_filename = os.path.join(tmp_folder, a.text).replace('\\', '/')
 
     print '  Local File:', local_filename
     need_to_download = True
@@ -201,11 +193,17 @@ else:
         need_to_download = False
         local_filename = existing_filename
         print '  Existing File Specified, Changed to:', existing_filename
+    else:
+        # if your version is lower go to download
+        print 'Start download...'
+        # download url
+        url = 'http://www.sidefx.com' + a.get('href').split('=')[-1] + 'get/'
+        print '  DOWNLOAD URL:', url
+        local_filename = os.path.join(tmp_folder, a.text).replace('\\', '/')
         
-
-    # get content
-    resp = client.get(url, stream=True)
-    total_length = int(resp.headers.get('content-length'))
+        # get content
+        resp = client.get(url, stream=True)
+        total_length = int(resp.headers.get('content-length'))
     
     if os.path.exists(local_filename):
         # compare file size
