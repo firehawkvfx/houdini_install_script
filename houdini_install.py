@@ -187,7 +187,7 @@ else:
     if not os.path.exists(tmp_folder):
         os.makedirs(tmp_folder)
 
-    print '  Local File:', local_filename
+    
     need_to_download = True
     if existing_filename is not None:
         need_to_download = False
@@ -204,16 +204,20 @@ else:
         # get content
         resp = client.get(url, stream=True)
         total_length = int(resp.headers.get('content-length'))
+        
+        if os.path.exists(local_filename):
+            # compare file size to see if file should be downloaded
+            local_size = os.path.getsize(local_filename)
+            print "local size", local_size, "download size", total_length
+            if not local_size == total_length:
+                os.remove(local_filename)
+                print "size not equal"
+            else:
+                # skip downloading if file already exists
+                print 'Skip download, File already Present', local_filename
+                need_to_download = False
     
-    if os.path.exists(local_filename):
-        # compare file size
-        if not os.path.getsize(local_filename) == total_length:
-            os.remove(local_filename)
-        else:
-            # skip downloading if file already exists
-            print 'Skip download, File already Present', local_filename
-            need_to_download = False
-
+    print '  Local File:', local_filename
     if need_to_download:
         # download file
         print 'Total size %sMb' % int(total_length/1024.0/1024.0)
