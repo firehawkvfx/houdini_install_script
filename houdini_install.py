@@ -47,7 +47,7 @@ tmp_folder = _args.temp_download_dir
 if tmp_folder:
     tmp_folder = os.path.expanduser(_args.temp_download_dir)
 else:
-    tmp_folder = os.path.expanduser('/var/tmp/openfirehawk')
+    tmp_folder = os.path.expanduser('/var/tmp/firehawk')
 tmp_folder = tmp_folder.replace('\\', '/').rstrip('/')
 
 # license server
