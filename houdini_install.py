@@ -66,15 +66,8 @@ if _args.server:
         lic_server = False
 
 buildversion = "production"
-if _args.buildversion:
-    if _args.buildversion in ['d', 'daily']:
-        print "will get daily build"
-        buildversion = "daily"
-    elif _args.buildversion in ['p', 'production']:
-        print "will get production build"
-        buildversion = "production"
-
 downloadonly = False
+
 if _args.downloadonly:
     if _args.downloadonly in ['true']:
         print "will download latest without install"
@@ -85,6 +78,14 @@ if _args.queryonly:
     if _args.queryonly in ['true']:
         print "will query latest filename without download or install"
         queryonly = True
+
+if _args.buildversion:
+    if _args.buildversion in ['d', 'daily']:
+        print "get daily build"
+        buildversion = "daily"
+    elif _args.buildversion in ['p', 'production']:
+        print "get production build"
+        buildversion = "production"
 
 existing_filename = None
 if _args.filename and _args.filename != 'auto':
@@ -104,7 +105,7 @@ if _args.filename and _args.filename != 'auto':
 ############################################################# START #############
 
 
-def create_output_dir(istall_dir, build):
+def create_output_dir(install_dir, build):
     """
     Change this to define installation folder
     """
@@ -171,6 +172,21 @@ if existing_filename is not None:
 
 print 'Last build is ', build
 
+def get_recursive_size(path):
+    size = sum( os.path.getsize(os.path.join(dirpath,filename)) for dirpath, dirnames, filenames in os.walk( path ) for filename in filenames )
+    return size
+
+import math
+
+def convert_size(size_bytes):
+   if size_bytes == 0:
+       return "0B"
+   size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+   i = int(math.floor(math.log(size_bytes, 1024)))
+   p = math.pow(1024, i)
+   s = round(size_bytes / p, 2)
+   return "%s %s" % (s, size_name[i])
+
 # check your last version here
 if not os.path.exists(install_dir):
     os.makedirs(install_dir)
@@ -179,8 +195,14 @@ if queryonly:
     print "File:", a.text
 else:
     # note, this isn't thourough enough.  the check should probably be handled in ansible.
-    if build in os.listdir(install_dir):
+    list_dir = os.listdir(install_dir)
+    folder_size = get_recursive_size(os.path.join(install_dir, build))
+    # if installed size is < 100MB approx, then overwrite.
+    min_size = 100000000
+    if build in list_dir and folder_size > 1000000:
+        print 'Existing Dirs:', list_dir, 'In:', install_dir
         print 'Build {} already installed'.format(build)
+        print 'Folder Size:', convert_size(folder_size)
         sys.exit()
     
     # create local file path
