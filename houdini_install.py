@@ -7,13 +7,13 @@ try:
     import requests
 except ImportError:
     print 'This script require requests module.\n Install: pip install requests'
-    sys.exit()
+    sys.exit(1)
 try:
     from bs4 import BeautifulSoup
 except ImportError:
     print 'This scrip require BeautifulSoup package (https://www.crummy.com/software/BeautifulSoup/bs4/doc/#).' \
           '\nInstall: pip install beautifulsoup4'
-    sys.exit()
+    sys.exit(1)
 
 # VARIABLES ################################
 parser = argparse.ArgumentParser()
@@ -35,12 +35,12 @@ password = _args.password
 if not username or not password:
     print 'Please set username and password'
     print 'Example: -u username -p password'
-    sys.exit()
+    sys.exit(1)
 
 install_dir = _args.install_dir
 if not install_dir:
     print 'ERROR: Please set installation folder in argument -i. For example: -i "%s"' % ('/opt/houdini' if os.name == 'postx' else 'c:\\cg\\houdini')
-    sys.exit()
+    sys.exit(1)
 install_dir = install_dir.replace('\\', '/').rstrip('/')
 
 tmp_folder = _args.temp_download_dir
@@ -129,7 +129,7 @@ if os.name == 'nt':
     category = 'win'
     if not windows_is_admin():
         print 'Run this script as administrator'
-        sys.exit()
+        sys.exit(1)
 elif os.name == 'posix':
     category = 'linux'
 else:
@@ -203,7 +203,7 @@ else:
         print 'Existing Dirs:', list_dir, 'In:', install_dir
         print 'Build {} already installed'.format(build)
         print 'Folder Size:', convert_size(folder_size)
-        sys.exit()
+        sys.exit(1)
     
     # create local file path
     if not os.path.exists(tmp_folder):
