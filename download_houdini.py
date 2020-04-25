@@ -11,6 +11,22 @@ import requests
 import hashlib
 import shutil
 
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-b", "--buildversion", type=str, help="Use latest daily build (d/daily, p/production)")
+
+_args, other_args = parser.parse_known_args()
+
+buildversion = "production"
+if _args.buildversion:
+    if _args.buildversion in ['d', 'daily']:
+        print "get daily build"
+        only_production = False
+    elif _args.buildversion in ['p', 'production']:
+        print "get production build"
+        only_production = True
+
 # Code that provides convenient Python wrappers to call into the API:
 
 def service(
@@ -162,7 +178,7 @@ if __name__ == '__main__':
     # Retrieve the daily builds list, if you want the latest production
     # you can skip this step
     releases_list = service.download.get_daily_builds_list(
-        product='houdini', version='18.0', platform='linux', only_production=False)
+        product='houdini', version='18.0', platform='linux', only_production=only_production)
 
     latest_build=releases_list[0]['build']
 
