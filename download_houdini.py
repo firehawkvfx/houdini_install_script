@@ -190,7 +190,6 @@ if __name__ == '__main__':
     # return query
     print('File: {}'.format( latest_release['filename'] ) )
     print('URL: {}'.format( latest_release['download_url'] ) )
-    print('Hash: {}'.format( latest_release['hash'] ) )
     filename=latest_release['filename']
     build=re.match('houdini-(.*)-.*', filename).groups()[0]
     print('Build: {}'.format( build ) )
